@@ -1,6 +1,7 @@
 #ifndef SP_TREE_H
 #define SP_TREE_H
 
+#define sp_root(r) (r->sp_r)
 #define sp_left(n) (n->left)
 #define sp_right(n) (n->right)
 #define sp_rparen(n) (sp_right(n)->parent)
@@ -14,6 +15,10 @@ struct sp_node {
 	struct sp_node *left;
 	struct sp_node *right;
 	struct sp_node *parent;
+};
+
+struct sp_root {
+	struct sp_node *sp_r;
 };
 
 enum sp_dir {

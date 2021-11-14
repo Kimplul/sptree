@@ -38,20 +38,6 @@ inline static void __sp_turn_right(struct sp_node *n)
 		sp_rparen(n) = n;
 }
 
-inline static struct sp_node *sp_first(struct sp_node *n)
-{
-	if(!sp_left(n)) return n;
-
-	return sp_first(sp_left(n));
-}
-
-inline static struct sp_node *sp_last(struct sp_node *n)
-{
-	if(!sp_right(n)) return n;
-
-	return sp_last(sp_right(n));
-}
-
 inline static int __sp_balance(struct sp_node *n)
 {
 	int l = 0;
@@ -83,7 +69,6 @@ inline static int __sp_max_hint(struct sp_node *n)
 		return r;
 }
 
-/* huh, sort of reminds me of an AVL tree... */
 inline static void sp_update(struct sp_node **root, struct sp_node *n)
 {
 	if(!n)
@@ -109,42 +94,21 @@ inline static void sp_update(struct sp_node **root, struct sp_node *n)
 		__sp_turn_left(n);
 	}
 
-	n->hint = __sp_max_height(n);
+	n->hint = __sp_max_hint(n);
 	if(n->hint == 0 || n->hint != prev_hint)
 		sp_update(root, p);
 }
 
-void sp_insert(struct sp_node **root, struct sp_node *new)
+void sp_insert(struct sp_node **root, struct sp_node *p,
+		struct sp_node *n, enum sp_dir d)
 {
-	struct sp_node *n = *root;
-	while(1){
-		if(n->value == new->value)
-			return;
+	if(d == LEFT)
+		sp_left(p) = n;
+	else
+		sp_right(p) = n;
 
-		if(new->value < n->value && sp_left(n)){
-			n = sp_left(n);
-			continue;
-		}
-
-		if(new->value < n->value){
-			sp_left(n) = new;
-			break;
-		}
-
-		if(new->value > n->value && sp_right(n)){
-			n = sp_right(n);
-			continue;
-		}
-
-		if(new->value > n->value){
-			sp_right(n) = new;
-			break;
-		}
-	}
-
-	sp_paren(new) = n;
-
-	sp_update(root, new);
+	sp_paren(n) = p;
+	sp_update(root, n);
 }
 
 inline static void __sp_replace_right(struct sp_node *n, struct sp_node *r)
@@ -248,4 +212,18 @@ void sp_remove(struct sp_node **root, struct sp_node *del)
 		sp_right(paren) = 0;
 
 	sp_update(root, paren);
+}
+
+struct sp_node *sp_first(struct sp_node *n)
+{
+	if(!sp_left(n)) return n;
+
+	return sp_first(sp_left(n));
+}
+
+struct sp_node *sp_last(struct sp_node *n)
+{
+	if(!sp_right(n)) return n;
+
+	return sp_last(sp_right(n));
 }
